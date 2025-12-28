@@ -64,8 +64,8 @@ LB_DEBCONF_NOWARNINGS="yes"
 LB_DEBCONF_PRIORITY="critical"
 
 # $LB_INITRAMFS: set initramfs hook
-# (Default: auto)
-LB_INITRAMFS="auto"
+# (Default: live-boot for standard /live/ directory)
+LB_INITRAMFS="live-boot"
 
 # $LB_INITRAMFS_COMPRESSION: set initramfs compression
 # (Default: )
