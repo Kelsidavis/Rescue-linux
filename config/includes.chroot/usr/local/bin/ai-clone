@@ -1,0 +1,56 @@
+#!/bin/bash
+# Disk Cloning Helper
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              Disk Cloning Assistant                          ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "Available disks:"
+echo ""
+lsblk -d -o NAME,SIZE,MODEL,TYPE | grep disk
+echo ""
+echo "Options:"
+echo "  1. Clone disk to disk (dd)"
+echo "  2. Clone disk to image file"
+echo "  3. Rescue clone (ddrescue - for failing disks)"
+echo "  4. Partition clone (partclone)"
+echo "  5. Create compressed image (fsarchiver)"
+echo ""
+read -p "Select option [1-5]: " opt
+
+case $opt in
+    1)
+        read -p "Source disk (e.g., sda): " src
+        read -p "Destination disk (e.g., sdb): " dst
+        echo "WARNING: This will ERASE all data on /dev/$dst"
+        read -p "Type 'YES' to confirm: " confirm
+        if [ "$confirm" = "YES" ]; then
+            dd if=/dev/$src of=/dev/$dst bs=64K status=progress conv=noerror,sync
+        fi
+        ;;
+    2)
+        read -p "Source disk (e.g., sda): " src
+        read -p "Output file path: " outfile
+        dd if=/dev/$src of="$outfile" bs=64K status=progress conv=noerror,sync
+        ;;
+    3)
+        read -p "Source disk (e.g., sda): " src
+        read -p "Destination (disk or file): " dst
+        read -p "Log file path: " logfile
+        echo "Using ddrescue for damaged disk recovery..."
+        ddrescue -d -r3 /dev/$src "$dst" "$logfile"
+        ;;
+    4)
+        echo "Available partitions:"
+        lsblk -o NAME,SIZE,FSTYPE,LABEL
+        read -p "Source partition (e.g., sda1): " src
+        read -p "Output image file: " outfile
+        fstype=$(lsblk -no FSTYPE /dev/$src)
+        partclone.$fstype -c -s /dev/$src -o "$outfile"
+        ;;
+    5)
+        read -p "Source partition(s) (e.g., sda1 sda2): " parts
+        read -p "Output archive name: " outfile
+        fsarchiver savefs "$outfile" $parts
+        ;;
+esac

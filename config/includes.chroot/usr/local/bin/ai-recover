@@ -1,0 +1,77 @@
+#!/bin/bash
+# Data Recovery Assistant
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              Data Recovery Assistant                         ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "Recovery Methods:"
+echo ""
+echo "  1. TestDisk - Recover lost partitions"
+echo "  2. PhotoRec - Recover deleted files (any filesystem)"
+echo "  3. extundelete - Undelete files from ext3/ext4"
+echo "  4. ext4magic - Advanced ext4 recovery"
+echo "  5. foremost - Carve files by headers"
+echo "  6. scalpel - Advanced file carving"
+echo "  7. recoverjpeg - Recover JPEG images"
+echo "  8. fatcat - Recover from FAT filesystems"
+echo ""
+read -p "Select method [1-8]: " opt
+
+case $opt in
+    1)
+        echo "Launching TestDisk..."
+        echo "Tip: Use TestDisk to find and recover lost partitions"
+        testdisk
+        ;;
+    2)
+        echo "Available disks/partitions:"
+        lsblk -o NAME,SIZE,FSTYPE
+        read -p "Source device (e.g., sda1): " src
+        read -p "Recovery output directory: " outdir
+        mkdir -p "$outdir"
+        photorec /d "$outdir" /dev/$src
+        ;;
+    3)
+        echo "ext3/ext4 undelete tool"
+        read -p "Source partition (e.g., sda1): " src
+        read -p "Output directory: " outdir
+        mkdir -p "$outdir"
+        extundelete /dev/$src --restore-all --output-dir "$outdir"
+        ;;
+    4)
+        echo "ext4magic recovery"
+        read -p "Source partition: " src
+        read -p "Output directory: " outdir
+        mkdir -p "$outdir"
+        ext4magic /dev/$src -r -d "$outdir"
+        ;;
+    5)
+        read -p "Source device or image: " src
+        read -p "Output directory: " outdir
+        mkdir -p "$outdir"
+        foremost -i "$src" -o "$outdir"
+        ;;
+    6)
+        read -p "Source device or image: " src
+        read -p "Output directory: " outdir
+        mkdir -p "$outdir"
+        scalpel "$src" -o "$outdir"
+        ;;
+    7)
+        read -p "Source device: " src
+        read -p "Output directory: " outdir
+        mkdir -p "$outdir"
+        recoverjpeg /dev/$src
+        mv *.jpg "$outdir/" 2>/dev/null
+        ;;
+    8)
+        read -p "FAT partition: " src
+        read -p "Output directory: " outdir
+        mkdir -p "$outdir"
+        fatcat /dev/$src -u -o "$outdir"
+        ;;
+esac
+
+echo ""
+echo "Recovery complete. Check output directory for recovered files."

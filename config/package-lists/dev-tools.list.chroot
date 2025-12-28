@@ -1,0 +1,46 @@
+# Build Essentials
+build-essential
+gcc
+g++
+make
+cmake
+pkg-config
+
+# Python
+python3
+python3-pip
+python3-venv
+python3-dev
+
+# Node.js (for Claude Code and other AI tools)
+nodejs
+npm
+
+# Editors
+vim
+nano
+neovim
+
+# Version Control
+git
+git-lfs
+
+# JSON/YAML Processing
+jq
+yq
+
+# Terminal Utilities
+tmux
+screen
+htop
+btop
+ncdu
+tree
+fzf
+ripgrep
+bat
+fd-find
+
+# Shell
+zsh
+bash-completion

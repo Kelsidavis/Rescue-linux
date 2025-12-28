@@ -1,0 +1,66 @@
+# Advanced Filesystem Tools
+zfsutils-linux
+zfs-initramfs
+
+# Forensics & Data Carving
+sleuthkit
+scalpel
+binwalk
+bulk-extractor
+recoverjpeg
+magicrescue
+
+# Hex Editors (low-level repair)
+hexedit
+xxd
+
+# File Managers
+mc
+ranger
+
+# Network Filesystem Support
+nfs-common
+cifs-utils
+smbclient
+
+# Backup & Imaging Tools
+borgbackup
+restic
+fsarchiver
+
+# QEMU disk tools (convert/mount images)
+qemu-utils
+libguestfs-tools
+guestmount
+
+# Password Recovery
+chntpw
+
+# Hardware Diagnostics
+memtester
+lm-sensors
+stress-ng
+fio
+
+# Log Analysis
+lnav
+
+# Secure Boot / UEFI
+mokutil
+efivar
+sbsigntool
+
+# RAID Tools
+dmraid
+dmeventd
+
+# Encryption Tools
+ecryptfs-utils
+
+# Disk Benchmarking
+bonnie++
+iozone3
+
+# Additional Recovery
+safecopy
+myrescue

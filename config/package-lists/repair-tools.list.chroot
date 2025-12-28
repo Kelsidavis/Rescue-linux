@@ -1,0 +1,56 @@
+# Filesystem Repair Tools
+e2fsprogs
+xfsprogs
+btrfs-progs
+dosfstools
+ntfs-3g
+exfatprogs
+f2fs-tools
+
+# Partition Management
+gparted
+parted
+gdisk
+
+# Boot Repair
+grub2-common
+grub-pc
+grub-efi-amd64
+efibootmgr
+os-prober
+boot-repair
+
+# Data Recovery
+testdisk
+gddrescue
+foremost
+extundelete
+ext4magic
+fatcat
+
+# Disk Cloning and Imaging
+partclone
+
+# Filesystem Analysis
+smartmontools
+hdparm
+sdparm
+nvme-cli
+
+# Archive and Compression
+p7zip-full
+unzip
+zip
+gzip
+bzip2
+xz-utils
+zstd
+
+# Chroot Environment
+debootstrap
+
+# System Information
+inxi
+hwinfo
+lshw
+dmidecode

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AI Repair Assistant
+Comment=Launch AI-assisted system repair
+Exec=xfce4-terminal -e "ai-repair"
+Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=System;Utility;
+Keywords=repair;ai;claude;rescue;

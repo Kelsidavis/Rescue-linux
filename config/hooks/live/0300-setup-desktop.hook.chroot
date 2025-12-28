@@ -1,0 +1,137 @@
+#!/bin/bash
+# Setup desktop shortcuts and final configurations
+
+set -e
+
+echo "Setting up desktop environment..."
+
+# Create desktop directory
+mkdir -p /home/rescue/Desktop
+
+# Copy desktop shortcuts
+cp /usr/share/applications/ai-repair.desktop /home/rescue/Desktop/
+cp /usr/share/applications/ai-diagnose.desktop /home/rescue/Desktop/
+cp /usr/share/applications/ai-chroot.desktop /home/rescue/Desktop/
+cp /usr/share/applications/ai-mount.desktop /home/rescue/Desktop/
+
+# Add GParted to desktop
+cat > /home/rescue/Desktop/gparted.desktop << 'EOF'
+[Desktop Entry]
+Name=GParted
+Comment=Partition Editor
+Exec=sudo gparted
+Icon=gparted
+Terminal=false
+Type=Application
+Categories=System;
+EOF
+
+# Add Terminal to desktop
+cat > /home/rescue/Desktop/terminal.desktop << 'EOF'
+[Desktop Entry]
+Name=Terminal
+Comment=Open Terminal
+Exec=xfce4-terminal
+Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=System;
+EOF
+
+# Add File Manager to desktop
+cat > /home/rescue/Desktop/thunar.desktop << 'EOF'
+[Desktop Entry]
+Name=File Manager
+Comment=Browse Files
+Exec=thunar
+Icon=system-file-manager
+Terminal=false
+Type=Application
+Categories=System;
+EOF
+
+# Mark all desktop files as trusted
+chmod +x /home/rescue/Desktop/*.desktop
+
+# Set ownership
+chown -R rescue:rescue /home/rescue/Desktop
+
+# Create API key setup helper
+cat > /home/rescue/Desktop/setup-api-keys.desktop << 'EOF'
+[Desktop Entry]
+Name=Setup API Keys
+Comment=Configure AI API keys
+Exec=xfce4-terminal -e "bash -c '/usr/local/bin/setup-api-keys; exec bash'"
+Icon=preferences-system
+Terminal=false
+Type=Application
+Categories=Settings;
+EOF
+chmod +x /home/rescue/Desktop/setup-api-keys.desktop
+
+# Create the API key setup script
+cat > /usr/local/bin/setup-api-keys << 'APISETUP'
+#!/bin/bash
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              AI API Key Configuration                        ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "This will help you configure API keys for AI tools."
+echo "Keys are stored in ~/.bashrc and loaded on login."
+echo ""
+
+CONFIG_FILE="$HOME/.ai-keys"
+
+# Anthropic/Claude
+echo "1. Anthropic (Claude) API Key"
+echo "   Get one at: https://console.anthropic.com/"
+read -p "   Enter key (or press Enter to skip): " ANTHROPIC_KEY
+if [ -n "$ANTHROPIC_KEY" ]; then
+    echo "export ANTHROPIC_API_KEY='$ANTHROPIC_KEY'" >> "$CONFIG_FILE"
+    export ANTHROPIC_API_KEY="$ANTHROPIC_KEY"
+fi
+
+echo ""
+
+# OpenAI
+echo "2. OpenAI API Key"
+echo "   Get one at: https://platform.openai.com/api-keys"
+read -p "   Enter key (or press Enter to skip): " OPENAI_KEY
+if [ -n "$OPENAI_KEY" ]; then
+    echo "export OPENAI_API_KEY='$OPENAI_KEY'" >> "$CONFIG_FILE"
+    export OPENAI_API_KEY="$OPENAI_KEY"
+fi
+
+echo ""
+
+# Google/Gemini
+echo "3. Google (Gemini) API Key"
+echo "   Get one at: https://aistudio.google.com/apikey"
+read -p "   Enter key (or press Enter to skip): " GOOGLE_KEY
+if [ -n "$GOOGLE_KEY" ]; then
+    echo "export GOOGLE_API_KEY='$GOOGLE_KEY'" >> "$CONFIG_FILE"
+    export GOOGLE_API_KEY="$GOOGLE_KEY"
+fi
+
+# Source the config
+if [ -f "$CONFIG_FILE" ]; then
+    echo ""
+    echo "Adding keys to shell configuration..."
+    grep -qxF "source $CONFIG_FILE" ~/.bashrc || echo "source $CONFIG_FILE" >> ~/.bashrc
+    source "$CONFIG_FILE"
+    echo ""
+    echo "API keys configured! They will be loaded automatically on login."
+    echo "To use them now, run: source ~/.ai-keys"
+fi
+
+echo ""
+echo "Configuration complete!"
+APISETUP
+chmod +x /usr/local/bin/setup-api-keys
+
+# XFCE Panel configuration
+mkdir -p /home/rescue/.config/xfce4/xfconf/xfce-perchannel-xml
+chown -R rescue:rescue /home/rescue/.config
+
+echo "Desktop setup complete!"

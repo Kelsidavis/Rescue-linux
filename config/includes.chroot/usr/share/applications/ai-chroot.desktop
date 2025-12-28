@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Chroot Helper
+Comment=Enter chroot environment for system repair
+Exec=xfce4-terminal -e "sudo ai-chroot"
+Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=System;Utility;
+Keywords=chroot;repair;rescue;

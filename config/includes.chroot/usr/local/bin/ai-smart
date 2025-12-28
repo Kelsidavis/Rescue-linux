@@ -1,0 +1,40 @@
+#!/bin/bash
+# SMART Disk Health Check
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              Disk Health Check (SMART)                       ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+for disk in /dev/sd? /dev/nvme?n?; do
+    if [ -b "$disk" ]; then
+        echo "═══════════════════════════════════════════════════════════════"
+        echo "Disk: $disk"
+        echo "═══════════════════════════════════════════════════════════════"
+
+        # Get basic info
+        model=$(smartctl -i "$disk" 2>/dev/null | grep -E "Device Model|Model Number" | head -1)
+        serial=$(smartctl -i "$disk" 2>/dev/null | grep -E "Serial Number" | head -1)
+        echo "$model"
+        echo "$serial"
+        echo ""
+
+        # Health status
+        health=$(smartctl -H "$disk" 2>/dev/null | grep -E "SMART overall-health|SMART Health Status")
+        if echo "$health" | grep -qi "passed\|ok"; then
+            echo -e "Health: \033[0;32mPASSED\033[0m"
+        else
+            echo -e "Health: \033[0;31mFAILING\033[0m"
+        fi
+
+        # Key attributes
+        echo ""
+        echo "Key Attributes:"
+        smartctl -A "$disk" 2>/dev/null | grep -E "Reallocated_Sector|Current_Pending|Offline_Uncorrectable|Temperature|Power_On_Hours|Wear_Leveling|Media_Wearout" | head -10
+        echo ""
+    fi
+done
+
+echo ""
+echo "For detailed analysis, run: smartctl -a /dev/sdX"
+echo "For extended self-test: smartctl -t long /dev/sdX"

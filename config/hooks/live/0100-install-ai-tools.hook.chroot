@@ -1,0 +1,492 @@
+#!/bin/bash
+# Install AI CLI Tools for Linux Rescue
+
+set -e
+
+echo "========================================"
+echo "Installing AI CLI Tools..."
+echo "========================================"
+
+# Ensure npm is available and updated
+npm install -g npm@latest
+
+# ----------------------------------------
+# 1. Claude Code (Anthropic's CLI)
+# ----------------------------------------
+echo "[1/6] Installing Claude Code..."
+npm install -g @anthropic-ai/claude-code || echo "Claude Code installation will complete on first run"
+
+# ----------------------------------------
+# 2. Gemini CLI (Google's AI CLI)
+# ----------------------------------------
+echo "[2/6] Installing Gemini CLI..."
+npm install -g @google/generative-ai-cli 2>/dev/null || npm install -g gemini-cli 2>/dev/null || echo "Gemini CLI not available via npm, will provide manual instructions"
+
+# ----------------------------------------
+# 3. GitHub Copilot CLI
+# ----------------------------------------
+echo "[3/6] Installing GitHub Copilot CLI..."
+npm install -g @githubnext/github-copilot-cli 2>/dev/null || echo "GitHub Copilot CLI will need manual setup"
+
+# ----------------------------------------
+# 4. Aider (AI pair programming)
+# ----------------------------------------
+echo "[4/6] Installing Aider..."
+pip3 install --break-system-packages aider-chat || pip3 install aider-chat || echo "Aider installation failed"
+
+# ----------------------------------------
+# 5. Ollama (Local AI)
+# ----------------------------------------
+echo "[5/6] Preparing Ollama..."
+# Ollama needs to be installed at runtime due to systemd requirements
+mkdir -p /opt/ai-tools
+cat > /opt/ai-tools/install-ollama.sh << 'OLLAMA_SCRIPT'
+#!/bin/bash
+echo "Installing Ollama..."
+curl -fsSL https://ollama.ai/install.sh | sh
+echo "Ollama installed. Run 'ollama serve' to start, then 'ollama pull llama2' to download a model."
+OLLAMA_SCRIPT
+chmod +x /opt/ai-tools/install-ollama.sh
+
+# ----------------------------------------
+# 6. LLM CLI (Simon Willison's tool)
+# ----------------------------------------
+echo "[6/6] Installing LLM CLI..."
+pip3 install --break-system-packages llm || pip3 install llm || echo "LLM CLI installation failed"
+
+# ----------------------------------------
+# Create AI helper scripts
+# ----------------------------------------
+echo "Creating AI helper scripts..."
+
+# AI Repair Assistant Script
+cat > /usr/local/bin/ai-repair << 'AIREPAIR'
+#!/bin/bash
+# AI-Assisted Linux Repair Helper
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║           AI-Assisted Linux Repair Helper                    ║"
+echo "╠══════════════════════════════════════════════════════════════╣"
+echo "║ Available AI Tools:                                          ║"
+echo "║                                                               ║"
+echo "║ 1. claude      - Claude Code (Anthropic) - Most Powerful     ║"
+echo "║ 2. aider       - AI Pair Programming                         ║"
+echo "║ 3. llm         - Multi-provider LLM CLI                      ║"
+echo "║ 4. ollama      - Local AI (run install-ollama first)         ║"
+echo "║                                                               ║"
+echo "║ Quick Commands:                                               ║"
+echo "║   ai-diagnose  - Run system diagnostics                      ║"
+echo "║   ai-mount     - Interactive disk mounting helper            ║"
+echo "║   ai-chroot    - Guided chroot into broken system            ║"
+echo "║   ai-grub      - GRUB repair assistant                       ║"
+echo "║   ai-fstab     - fstab repair helper                         ║"
+echo "║                                                               ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+
+if command -v claude &> /dev/null; then
+    echo ""
+    echo "Launching Claude Code for interactive repair assistance..."
+    echo "Type your repair question or describe the problem."
+    echo ""
+    claude
+else
+    echo ""
+    echo "Claude Code not configured. Please set ANTHROPIC_API_KEY first:"
+    echo "  export ANTHROPIC_API_KEY='your-api-key'"
+    echo "  claude"
+fi
+AIREPAIR
+chmod +x /usr/local/bin/ai-repair
+
+# System Diagnostics Script
+cat > /usr/local/bin/ai-diagnose << 'DIAGNOSE'
+#!/bin/bash
+# System Diagnostics for AI Analysis
+
+OUTPUT="/tmp/system-diagnosis-$(date +%Y%m%d-%H%M%S).txt"
+
+echo "Running comprehensive system diagnostics..."
+echo "Output will be saved to: $OUTPUT"
+
+{
+    echo "=========================================="
+    echo "SYSTEM DIAGNOSTICS REPORT"
+    echo "Generated: $(date)"
+    echo "=========================================="
+    echo ""
+
+    echo "=== BLOCK DEVICES ==="
+    lsblk -f
+    echo ""
+
+    echo "=== DISK USAGE ==="
+    df -h 2>/dev/null
+    echo ""
+
+    echo "=== MOUNTED FILESYSTEMS ==="
+    mount
+    echo ""
+
+    echo "=== PARTITION TABLES ==="
+    for disk in /dev/sd? /dev/nvme?n? /dev/vd?; do
+        if [ -b "$disk" ]; then
+            echo "--- $disk ---"
+            fdisk -l "$disk" 2>/dev/null
+            echo ""
+        fi
+    done
+
+    echo "=== SMART STATUS ==="
+    for disk in /dev/sd? /dev/nvme?n?; do
+        if [ -b "$disk" ]; then
+            echo "--- $disk ---"
+            smartctl -H "$disk" 2>/dev/null || echo "SMART not available"
+            echo ""
+        fi
+    done
+
+    echo "=== DMESG ERRORS (last 50) ==="
+    dmesg | grep -i -E "(error|fail|warn)" | tail -50
+    echo ""
+
+    echo "=== JOURNAL ERRORS (if available) ==="
+    journalctl -p err -n 50 2>/dev/null || echo "Journal not available"
+    echo ""
+
+    echo "=== HARDWARE INFO ==="
+    inxi -Fxz 2>/dev/null || lshw -short 2>/dev/null || echo "Hardware info not available"
+    echo ""
+
+    echo "=== NETWORK INTERFACES ==="
+    ip addr
+    echo ""
+
+    echo "=== EFI BOOT ENTRIES ==="
+    efibootmgr -v 2>/dev/null || echo "Not EFI or efibootmgr not available"
+    echo ""
+
+} > "$OUTPUT" 2>&1
+
+echo ""
+echo "Diagnostics complete! Report saved to: $OUTPUT"
+echo ""
+echo "To analyze with AI, run:"
+echo "  cat $OUTPUT | claude"
+echo "  or"
+echo "  cat $OUTPUT | aider --message 'analyze this system diagnostic'"
+DIAGNOSE
+chmod +x /usr/local/bin/ai-diagnose
+
+# Chroot Helper
+cat > /usr/local/bin/ai-chroot << 'CHROOTHELPER'
+#!/bin/bash
+# Interactive Chroot Helper
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              AI-Assisted Chroot Helper                       ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "Available Linux installations found:"
+echo ""
+
+# Find potential root partitions
+count=0
+declare -A roots
+for part in /dev/sd??* /dev/nvme?n?p* /dev/vd??*; do
+    if [ -b "$part" ]; then
+        # Try to identify Linux root partitions
+        fstype=$(lsblk -no FSTYPE "$part" 2>/dev/null)
+        if [[ "$fstype" =~ ^(ext4|ext3|btrfs|xfs)$ ]]; then
+            tmpdir=$(mktemp -d)
+            if mount -o ro "$part" "$tmpdir" 2>/dev/null; then
+                if [ -d "$tmpdir/etc" ] && [ -d "$tmpdir/usr" ]; then
+                    ((count++))
+                    roots[$count]="$part"
+                    distro="Unknown"
+                    [ -f "$tmpdir/etc/os-release" ] && distro=$(grep PRETTY_NAME "$tmpdir/etc/os-release" | cut -d'"' -f2)
+                    echo "  [$count] $part - $fstype - $distro"
+                fi
+                umount "$tmpdir"
+            fi
+            rmdir "$tmpdir"
+        fi
+    fi
+done
+
+if [ $count -eq 0 ]; then
+    echo "  No Linux installations found."
+    echo "  Make sure the disk is connected and partitions are visible."
+    exit 1
+fi
+
+echo ""
+read -p "Select installation to chroot into [1-$count]: " choice
+
+if [ -z "${roots[$choice]}" ]; then
+    echo "Invalid selection"
+    exit 1
+fi
+
+TARGET="${roots[$choice]}"
+MOUNTPOINT="/mnt/rescue"
+
+echo ""
+echo "Mounting $TARGET to $MOUNTPOINT..."
+mkdir -p "$MOUNTPOINT"
+mount "$TARGET" "$MOUNTPOINT"
+
+# Mount necessary filesystems
+echo "Mounting virtual filesystems..."
+mount --bind /dev "$MOUNTPOINT/dev"
+mount --bind /dev/pts "$MOUNTPOINT/dev/pts"
+mount --bind /proc "$MOUNTPOINT/proc"
+mount --bind /sys "$MOUNTPOINT/sys"
+mount --bind /run "$MOUNTPOINT/run"
+
+# Mount EFI if present
+if [ -d /sys/firmware/efi ]; then
+    # Find EFI partition
+    for efi in /dev/sd??* /dev/nvme?n?p* /dev/vd??*; do
+        if [ -b "$efi" ]; then
+            parttype=$(lsblk -no PARTTYPE "$efi" 2>/dev/null)
+            if [ "$parttype" = "c12a7328-f81f-11d2-ba4b-00a0c93ec93b" ]; then
+                mkdir -p "$MOUNTPOINT/boot/efi"
+                mount "$efi" "$MOUNTPOINT/boot/efi"
+                echo "EFI partition mounted"
+                break
+            fi
+        fi
+    done
+fi
+
+echo ""
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  Entering chroot environment. Type 'exit' to leave.         ║"
+echo "║  Common repair commands:                                     ║"
+echo "║    update-grub          - Regenerate GRUB config            ║"
+echo "║    grub-install /dev/X  - Reinstall GRUB bootloader         ║"
+echo "║    dpkg --configure -a  - Fix broken packages               ║"
+echo "║    apt --fix-broken install - Fix dependencies              ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+chroot "$MOUNTPOINT" /bin/bash
+
+echo ""
+echo "Cleaning up mounts..."
+umount -R "$MOUNTPOINT"
+echo "Done!"
+CHROOTHELPER
+chmod +x /usr/local/bin/ai-chroot
+
+# GRUB Repair Helper
+cat > /usr/local/bin/ai-grub << 'GRUBHELPER'
+#!/bin/bash
+# GRUB Repair Assistant
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              GRUB Repair Assistant                           ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "This tool will help repair GRUB bootloader issues."
+echo ""
+echo "Step 1: Detecting boot configuration..."
+echo ""
+
+if [ -d /sys/firmware/efi ]; then
+    echo "  Boot Mode: UEFI"
+    echo "  EFI Variables: $(ls /sys/firmware/efi/efivars 2>/dev/null | wc -l) entries"
+else
+    echo "  Boot Mode: Legacy BIOS"
+fi
+
+echo ""
+echo "Step 2: Detecting disks and partitions..."
+echo ""
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT,LABEL
+
+echo ""
+echo "Options:"
+echo "  1. Run ai-chroot and repair from inside the system"
+echo "  2. Use boot-repair GUI tool"
+echo "  3. Get AI assistance for complex issues"
+echo ""
+read -p "Select option [1-3]: " opt
+
+case $opt in
+    1) ai-chroot ;;
+    2) boot-repair & ;;
+    3)
+        echo "Generating diagnostic report for AI analysis..."
+        ai-diagnose
+        echo ""
+        echo "Run 'ai-repair' to get AI assistance with the diagnostic report."
+        ;;
+    *) echo "Invalid option" ;;
+esac
+GRUBHELPER
+chmod +x /usr/local/bin/ai-grub
+
+# Mount Helper
+cat > /usr/local/bin/ai-mount << 'MOUNTHELPER'
+#!/bin/bash
+# Interactive Mount Helper
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              Disk Mount Helper                               ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "Available partitions:"
+echo ""
+lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINT
+echo ""
+echo "Enter partition to mount (e.g., sda1, nvme0n1p2):"
+read -p "> " partition
+
+if [ -z "$partition" ]; then
+    echo "No partition specified"
+    exit 1
+fi
+
+# Add /dev/ if not present
+[[ "$partition" != /dev/* ]] && partition="/dev/$partition"
+
+if [ ! -b "$partition" ]; then
+    echo "Partition $partition does not exist"
+    exit 1
+fi
+
+# Create mount point
+mountpoint="/mnt/$(basename $partition)"
+mkdir -p "$mountpoint"
+
+echo ""
+echo "Mount options:"
+echo "  1. Read-write (default)"
+echo "  2. Read-only (safer for recovery)"
+echo ""
+read -p "Select [1-2]: " mode
+
+case $mode in
+    2) opts="-o ro" ;;
+    *) opts="" ;;
+esac
+
+echo "Mounting $partition to $mountpoint..."
+if mount $opts "$partition" "$mountpoint"; then
+    echo "Success! Partition mounted at $mountpoint"
+    echo ""
+    echo "Contents:"
+    ls -la "$mountpoint" | head -20
+else
+    echo "Mount failed. Trying with additional options..."
+
+    fstype=$(lsblk -no FSTYPE "$partition")
+    case $fstype in
+        ntfs)
+            mount -t ntfs-3g $opts "$partition" "$mountpoint" && echo "Mounted as NTFS"
+            ;;
+        *)
+            echo "Could not mount. Check dmesg for errors:"
+            dmesg | tail -10
+            ;;
+    esac
+fi
+MOUNTHELPER
+chmod +x /usr/local/bin/ai-mount
+
+# fstab Helper
+cat > /usr/local/bin/ai-fstab << 'FSTABHELPER'
+#!/bin/bash
+# fstab Repair Helper
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              fstab Repair Helper                             ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+FSTAB_PATH=""
+
+# Check if we're in a chroot or have a mounted system
+if [ -f /mnt/rescue/etc/fstab ]; then
+    FSTAB_PATH="/mnt/rescue/etc/fstab"
+elif [ -f /etc/fstab ]; then
+    FSTAB_PATH="/etc/fstab"
+fi
+
+if [ -z "$FSTAB_PATH" ]; then
+    echo "No fstab found. Please mount the target system first:"
+    echo "  Run: ai-chroot"
+    echo "  or:  ai-mount"
+    exit 1
+fi
+
+echo "Found fstab: $FSTAB_PATH"
+echo ""
+echo "Current contents:"
+echo "─────────────────────────────────────────────────────────────────"
+cat -n "$FSTAB_PATH"
+echo "─────────────────────────────────────────────────────────────────"
+echo ""
+echo "Current block device UUIDs:"
+echo ""
+blkid
+echo ""
+echo "Options:"
+echo "  1. Validate fstab entries"
+echo "  2. Backup and edit fstab"
+echo "  3. Generate new fstab from current mounts"
+echo "  4. Get AI assistance"
+echo ""
+read -p "Select [1-4]: " opt
+
+case $opt in
+    1)
+        echo "Validating fstab..."
+        while IFS= read -r line; do
+            [[ "$line" =~ ^#.*$ ]] && continue
+            [[ -z "$line" ]] && continue
+
+            uuid=$(echo "$line" | awk '{print $1}')
+            if [[ "$uuid" == UUID=* ]]; then
+                uuid_val=${uuid#UUID=}
+                if ! blkid | grep -q "$uuid_val"; then
+                    echo "WARNING: UUID $uuid_val not found!"
+                fi
+            fi
+        done < "$FSTAB_PATH"
+        echo "Validation complete."
+        ;;
+    2)
+        cp "$FSTAB_PATH" "${FSTAB_PATH}.backup.$(date +%Y%m%d)"
+        echo "Backup created. Opening editor..."
+        ${EDITOR:-nano} "$FSTAB_PATH"
+        ;;
+    3)
+        echo "# Generated fstab - $(date)" > /tmp/fstab.new
+        echo "# Review carefully before using" >> /tmp/fstab.new
+        genfstab -U /mnt/rescue >> /tmp/fstab.new 2>/dev/null || \
+            echo "genfstab not available. Manual generation needed."
+        cat /tmp/fstab.new
+        ;;
+    4)
+        echo "Copying fstab info for AI analysis..."
+        {
+            echo "=== FSTAB CONTENTS ==="
+            cat "$FSTAB_PATH"
+            echo ""
+            echo "=== AVAILABLE BLOCK DEVICES ==="
+            blkid
+            echo ""
+            echo "=== CURRENT MOUNTS ==="
+            mount
+        } > /tmp/fstab-analysis.txt
+        echo "Run: cat /tmp/fstab-analysis.txt | claude"
+        ;;
+esac
+FSTABHELPER
+chmod +x /usr/local/bin/ai-fstab
+
+echo "========================================"
+echo "AI Tools Installation Complete!"
+echo "========================================"

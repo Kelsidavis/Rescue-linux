@@ -1,0 +1,22 @@
+# Minimal Desktop Environment
+xfce4
+xfce4-terminal
+xfce4-taskmanager
+lightdm
+lightdm-gtk-greeter
+
+# Display and Graphics
+xorg
+xserver-xorg-video-all
+mesa-utils
+
+# Essential Desktop Apps
+firefox
+thunar
+mousepad
+ristretto
+
+# Fonts
+fonts-ubuntu
+fonts-dejavu
+fonts-liberation

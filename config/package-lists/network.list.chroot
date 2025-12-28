@@ -1,0 +1,33 @@
+# Network Essentials
+network-manager
+network-manager-gnome
+wpasupplicant
+wireless-tools
+iw
+rfkill
+
+# Network Utilities
+net-tools
+iproute2
+iputils-ping
+traceroute
+mtr-tiny
+dnsutils
+whois
+nmap
+tcpdump
+ethtool
+bridge-utils
+
+# File Transfer
+wget
+curl
+rsync
+openssh-client
+openssh-server
+sshfs
+rclone
+
+# Remote Access
+tigervnc-standalone-server
+tigervnc-viewer

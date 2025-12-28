@@ -1,0 +1,23 @@
+# Advanced Network Tools
+lftp
+aria2
+netcat-openbsd
+socat
+iptables
+nftables
+wireguard-tools
+
+# VPN Clients
+openvpn
+openconnect
+
+# Network Diagnostics
+iperf3
+nethogs
+iftop
+bmon
+speedtest-cli
+
+# Remote Desktop
+remmina
+freerdp2-x11

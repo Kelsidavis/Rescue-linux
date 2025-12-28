@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Disk Mount Helper
+Comment=Interactive disk mounting assistant
+Exec=xfce4-terminal -e "sudo ai-mount"
+Icon=drive-harddisk
+Terminal=false
+Type=Application
+Categories=System;Utility;
+Keywords=mount;disk;partition;

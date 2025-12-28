@@ -1,0 +1,86 @@
+#!/bin/bash
+# Configure AI Rescue Linux System
+
+set -e
+
+echo "Configuring AI Rescue Linux..."
+
+# Create rescue user
+useradd -m -s /bin/bash -G sudo,adm,cdrom,dip,plugdev rescue || true
+echo "rescue:rescue" | chpasswd
+echo "rescue ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/rescue
+
+# Configure auto-login for LightDM
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/50-autologin.conf << 'EOF'
+[Seat:*]
+autologin-user=rescue
+autologin-user-timeout=0
+EOF
+
+# Configure locale
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen
+update-locale LANG=en_US.UTF-8
+
+# Set timezone to UTC
+ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+
+# Configure hostname
+echo "ai-rescue" > /etc/hostname
+cat > /etc/hosts << 'EOF'
+127.0.0.1   localhost
+127.0.1.1   ai-rescue
+
+::1         localhost ip6-localhost ip6-loopback
+ff02::1     ip6-allnodes
+ff02::2     ip6-allrouters
+EOF
+
+# Enable services
+systemctl enable NetworkManager
+systemctl enable lightdm
+systemctl enable ssh
+
+# Create desktop autostart for terminal with welcome
+mkdir -p /home/rescue/.config/autostart
+cat > /home/rescue/.config/autostart/welcome-terminal.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=AI Rescue Welcome
+Exec=xfce4-terminal --maximize -e "bash -c '/usr/local/bin/ai-welcome; exec bash'"
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+EOF
+chown -R rescue:rescue /home/rescue/.config
+
+# Configure bash for rescue user
+cat >> /home/rescue/.bashrc << 'BASHRC'
+
+# AI Rescue Linux Configuration
+export PATH="$PATH:/opt/ai-tools"
+
+# Helpful aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias lsblk='lsblk -f'
+alias mount-all='ai-mount'
+alias chroot-repair='ai-chroot'
+alias diagnose='ai-diagnose'
+
+# Welcome message on new terminal
+if [ -z "$AI_RESCUE_WELCOMED" ]; then
+    export AI_RESCUE_WELCOMED=1
+fi
+
+# Prompt
+PS1='\[\033[1;36m\]AI-Rescue\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]\$ '
+BASHRC
+
+chown rescue:rescue /home/rescue/.bashrc
+
+echo "System configuration complete!"

@@ -1,0 +1,46 @@
+# Core System
+linux-generic
+linux-firmware
+
+# System Utilities
+sudo
+dbus
+policykit-1
+
+# User Management
+passwd
+adduser
+
+# Locale and Time
+locales
+tzdata
+
+# Console
+console-setup
+keyboard-configuration
+
+# Power Management
+acpi
+acpid
+
+# Sound
+pulseaudio
+alsa-utils
+pavucontrol
+
+# Encryption
+cryptsetup
+cryptsetup-initramfs
+
+# LVM Support
+lvm2
+
+# RAID Support
+mdadm
+
+# USB Support
+usbutils
+udisks2
+
+# Man pages
+man-db

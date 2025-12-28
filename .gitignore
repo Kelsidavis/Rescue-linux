@@ -1,0 +1,40 @@
+# Live-build artifacts
+chroot/
+binary/
+cache/
+.build/
+*.iso
+*.img
+*.hybrid.iso
+*.contents
+*.files
+*.packages
+*.zsync
+
+# Build logs
+build.log
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Local configuration
+.env
+*.local
+
+# Backup files
+*.bak
+*.backup
+*.orig

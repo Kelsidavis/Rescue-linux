@@ -1,0 +1,78 @@
+#!/bin/bash
+# Network Diagnostics Helper
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              Network Diagnostics                             ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Interface status
+echo "═══ Network Interfaces ═══"
+ip -br addr
+echo ""
+
+# Connection status
+echo "═══ Connection Status ═══"
+if ping -c 1 -W 2 8.8.8.8 &>/dev/null; then
+    echo -e "Internet: \033[0;32mConnected\033[0m"
+else
+    echo -e "Internet: \033[0;31mNo connection\033[0m"
+fi
+
+if ping -c 1 -W 2 google.com &>/dev/null; then
+    echo -e "DNS: \033[0;32mWorking\033[0m"
+else
+    echo -e "DNS: \033[0;31mNot resolving\033[0m"
+fi
+echo ""
+
+# Gateway
+echo "═══ Gateway ═══"
+ip route | grep default
+echo ""
+
+# DNS
+echo "═══ DNS Servers ═══"
+cat /etc/resolv.conf | grep nameserver
+echo ""
+
+echo "Options:"
+echo "  1. Configure WiFi (nmtui)"
+echo "  2. Configure wired connection"
+echo "  3. Set static IP"
+echo "  4. Run speed test"
+echo "  5. Scan local network"
+echo "  6. Test port connectivity"
+echo ""
+read -p "Select [1-6] or Enter to exit: " opt
+
+case $opt in
+    1) nmtui ;;
+    2) nmtui-connect ;;
+    3)
+        read -p "Interface (e.g., eth0): " iface
+        read -p "IP Address (e.g., 192.168.1.100/24): " ipaddr
+        read -p "Gateway: " gw
+        read -p "DNS (e.g., 8.8.8.8): " dns
+        ip addr add "$ipaddr" dev "$iface"
+        ip route add default via "$gw"
+        echo "nameserver $dns" > /etc/resolv.conf
+        echo "Static IP configured."
+        ;;
+    4)
+        if command -v speedtest-cli &>/dev/null; then
+            speedtest-cli
+        else
+            echo "speedtest-cli not installed"
+        fi
+        ;;
+    5)
+        read -p "Network to scan (e.g., 192.168.1.0/24): " net
+        nmap -sn "$net"
+        ;;
+    6)
+        read -p "Host: " host
+        read -p "Port: " port
+        nc -zv "$host" "$port"
+        ;;
+esac
