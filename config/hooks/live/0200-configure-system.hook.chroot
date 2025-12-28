@@ -5,16 +5,53 @@ set -e
 
 echo "Configuring AI Rescue Linux..."
 
-# Create rescue user
-useradd -m -s /bin/bash -G sudo,adm,cdrom,dip,plugdev rescue || true
-echo "rescue:rescue" | chpasswd
-echo "rescue ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/rescue
+CONFIG_DIR="/etc/ai-rescue"
+
+# Read custom configurations if they exist
+RESCUE_USER="rescue"
+RESCUE_PASS="rescue"
+RESCUE_TZ="UTC"
+RESCUE_KB="us"
+
+if [ -f "$CONFIG_DIR/custom-username" ]; then
+    RESCUE_USER=$(cat "$CONFIG_DIR/custom-username")
+    echo "Using custom username: $RESCUE_USER"
+fi
+
+if [ -f "$CONFIG_DIR/custom-password" ]; then
+    RESCUE_PASS=$(cat "$CONFIG_DIR/custom-password")
+    echo "Using custom password"
+fi
+
+if [ -f "$CONFIG_DIR/custom-timezone" ]; then
+    RESCUE_TZ=$(cat "$CONFIG_DIR/custom-timezone")
+    echo "Using timezone: $RESCUE_TZ"
+fi
+
+if [ -f "$CONFIG_DIR/custom-keyboard" ]; then
+    RESCUE_KB=$(cat "$CONFIG_DIR/custom-keyboard")
+    echo "Using keyboard layout: $RESCUE_KB"
+fi
+
+# Create user
+useradd -m -s /bin/bash -G sudo,adm,cdrom,dip,plugdev "$RESCUE_USER" || true
+echo "$RESCUE_USER:$RESCUE_PASS" | chpasswd
+echo "$RESCUE_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/rescue-user
+chmod 440 /etc/sudoers.d/rescue-user
+
+# Also create default rescue user if custom user specified (for compatibility)
+if [ "$RESCUE_USER" != "rescue" ]; then
+    useradd -m -s /bin/bash -G sudo,adm,cdrom,dip,plugdev rescue || true
+    echo "rescue:rescue" | chpasswd
+    echo "rescue ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/rescue
+    chmod 440 /etc/sudoers.d/rescue
+fi
 
 # Configure auto-login for LightDM
 mkdir -p /etc/lightdm/lightdm.conf.d
-cat > /etc/lightdm/lightdm.conf.d/50-autologin.conf << 'EOF'
+cat > /etc/lightdm/lightdm.conf.d/50-autologin.conf << EOF
 [Seat:*]
-autologin-user=rescue
+autologin-user=$RESCUE_USER
 autologin-user-timeout=0
 EOF
 
@@ -23,8 +60,19 @@ echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 locale-gen
 update-locale LANG=en_US.UTF-8
 
-# Set timezone to UTC
-ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+# Set timezone
+if [ -f "/usr/share/zoneinfo/$RESCUE_TZ" ]; then
+    ln -sf "/usr/share/zoneinfo/$RESCUE_TZ" /etc/localtime
+    echo "$RESCUE_TZ" > /etc/timezone
+else
+    ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+    echo "UTC" > /etc/timezone
+fi
+
+# Configure keyboard
+if [ -n "$RESCUE_KB" ]; then
+    sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"$RESCUE_KB\"/" /etc/default/keyboard 2>/dev/null || true
+fi
 
 # Configure hostname
 echo "ai-rescue" > /etc/hostname
@@ -42,9 +90,12 @@ systemctl enable NetworkManager
 systemctl enable lightdm
 systemctl enable ssh
 
+# Setup user home directory
+USER_HOME="/home/$RESCUE_USER"
+
 # Create desktop autostart for terminal with welcome
-mkdir -p /home/rescue/.config/autostart
-cat > /home/rescue/.config/autostart/welcome-terminal.desktop << 'EOF'
+mkdir -p "$USER_HOME/.config/autostart"
+cat > "$USER_HOME/.config/autostart/welcome-terminal.desktop" << 'EOF'
 [Desktop Entry]
 Type=Application
 Name=AI Rescue Welcome
@@ -53,13 +104,17 @@ Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
 EOF
-chown -R rescue:rescue /home/rescue/.config
 
-# Configure bash for rescue user
-cat >> /home/rescue/.bashrc << 'BASHRC'
+# Configure bash for user
+cat >> "$USER_HOME/.bashrc" << 'BASHRC'
 
 # AI Rescue Linux Configuration
 export PATH="$PATH:/opt/ai-tools"
+
+# Load credentials if available
+if [ -f /etc/ai-rescue/credentials.env ]; then
+    source /etc/ai-rescue/credentials.env
+fi
 
 # Helpful aliases
 alias ll='ls -alF'
@@ -81,6 +136,21 @@ fi
 PS1='\[\033[1;36m\]AI-Rescue\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]\$ '
 BASHRC
 
-chown rescue:rescue /home/rescue/.bashrc
+# Set ownership
+chown -R "$RESCUE_USER:$RESCUE_USER" "$USER_HOME"
+
+# Secure credentials file if it exists
+if [ -f "$CONFIG_DIR/credentials.env" ]; then
+    chmod 600 "$CONFIG_DIR/credentials.env"
+    chown root:root "$CONFIG_DIR/credentials.env"
+    # Make readable by the user too
+    chmod 644 "$CONFIG_DIR/credentials.env"
+fi
+
+# Clean up sensitive config files (passwords)
+rm -f "$CONFIG_DIR/custom-password" 2>/dev/null || true
 
 echo "System configuration complete!"
+echo "User: $RESCUE_USER"
+echo "Timezone: $RESCUE_TZ"
+echo "Keyboard: $RESCUE_KB"

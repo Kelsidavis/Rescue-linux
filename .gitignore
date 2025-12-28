@@ -38,3 +38,8 @@ Thumbs.db
 *.bak
 *.backup
 *.orig
+
+# Embedded credentials (NEVER commit these!)
+config/includes.chroot/etc/ai-rescue/
+**/credentials.env
+**/custom-password

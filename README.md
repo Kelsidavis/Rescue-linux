@@ -169,17 +169,42 @@ ai-smart
 ```bash
 # Clone repository
 git clone https://github.com/Kelsidavis/Rescue-linux.git
-cd ai-rescue-linux
+cd Rescue-linux
 
 # Install dependencies
 sudo apt install live-build debootstrap xorriso isolinux syslinux-efi \
                  grub-pc-bin grub-efi-amd64-bin mtools squashfs-tools
 
+# Optional: Configure API keys to embed in ISO
+./configure.sh
+
 # Build ISO
 sudo ./build.sh
 ```
 
-Build takes 15-30 minutes. Output: `live-image-amd64.hybrid.iso` (~3-4GB)
+Build takes 15-30 minutes. Output: `ai-rescue-linux.iso` (~3-4GB)
+
+### Pre-Configuration (Optional)
+
+Run `./configure.sh` before building to embed your API keys and preferences directly into the ISO. This means AI tools will work immediately on boot without any setup!
+
+```bash
+./configure.sh
+```
+
+**Configuration options:**
+| Setting | Description |
+|---------|-------------|
+| Anthropic API Key | For Claude Code (recommended) |
+| OpenAI API Key | For GPT-4/Codex |
+| Google API Key | For Gemini |
+| GitHub Token | For Copilot CLI |
+| Custom Username | Replace default "rescue" user |
+| Custom Password | Replace default "rescue" password |
+| Timezone | Set system timezone |
+| Keyboard Layout | Set keyboard layout (us, uk, de, etc.) |
+
+**Security Warning:** Embedded API keys can be extracted from the ISO. Only use for personal rescue USBs, not public distribution.
 
 ### Customization
 
