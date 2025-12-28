@@ -1,0 +1,51 @@
+#!/bin/bash
+# Set up Plymouth boot animation theme
+
+set -e
+
+echo "Setting up AI Rescue Plymouth theme..."
+
+THEME_DIR="/usr/share/plymouth/themes/ai-rescue"
+
+# Convert SVGs to PNGs if rsvg-convert is available
+if command -v rsvg-convert &> /dev/null; then
+    cd "$THEME_DIR"
+
+    if [ -f logo.svg ]; then
+        rsvg-convert -w 300 -h 120 logo.svg -o logo.png
+        echo "Created logo.png"
+    fi
+
+    if [ -f spinner.svg ]; then
+        rsvg-convert -w 48 -h 48 spinner.svg -o spinner.png
+        echo "Created spinner.png"
+    fi
+
+    if [ -f progress-bar.svg ]; then
+        rsvg-convert -w 300 -h 4 progress-bar.svg -o progress-bar.png
+        echo "Created progress-bar.png"
+    fi
+
+    # Clean up SVGs
+    rm -f *.svg
+else
+    echo "Warning: rsvg-convert not found, creating placeholder PNGs"
+    # Create simple placeholder images using ImageMagick if available
+    if command -v convert &> /dev/null; then
+        cd "$THEME_DIR"
+        convert -size 300x120 xc:'#0d1117' -fill '#00d4aa' -font DejaVu-Sans-Mono-Bold -pointsize 36 -gravity center -annotate 0 'AI RESCUE' logo.png
+        convert -size 48x48 xc:transparent -fill '#00d4aa' -draw "circle 24,24 24,4" spinner.png
+        convert -size 300x4 xc:'#00d4aa' progress-bar.png
+    fi
+fi
+
+# Set as default Plymouth theme
+if [ -f /usr/sbin/plymouth-set-default-theme ]; then
+    plymouth-set-default-theme ai-rescue || true
+fi
+
+# Update alternatives
+update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth \
+    /usr/share/plymouth/themes/ai-rescue/ai-rescue.plymouth 200 || true
+
+echo "Plymouth theme setup complete!"

@@ -1,0 +1,43 @@
+#!/bin/bash
+# Set up branding assets - convert SVGs to PNGs for compatibility
+
+set -e
+
+echo "Setting up AI Rescue branding..."
+
+BG_DIR="/usr/share/backgrounds/ai-rescue"
+
+# Convert wallpaper to PNG for better compatibility
+if command -v rsvg-convert &> /dev/null; then
+    cd "$BG_DIR"
+
+    if [ -f wallpaper.svg ]; then
+        rsvg-convert -w 1920 -h 1080 wallpaper.svg -o wallpaper.png
+        echo "Created wallpaper.png (1920x1080)"
+        # Also create 4K version
+        rsvg-convert -w 3840 -h 2160 wallpaper.svg -o wallpaper-4k.png
+        echo "Created wallpaper-4k.png (3840x2160)"
+    fi
+
+    if [ -f user-icon.svg ]; then
+        rsvg-convert -w 96 -h 96 user-icon.svg -o user-icon.png
+        echo "Created user-icon.png"
+    fi
+fi
+
+# Update LightDM config to use PNG if available
+LIGHTDM_CONF="/etc/lightdm/lightdm-gtk-greeter.conf"
+if [ -f "$BG_DIR/wallpaper.png" ] && [ -f "$LIGHTDM_CONF" ]; then
+    sed -i 's|wallpaper.svg|wallpaper.png|g' "$LIGHTDM_CONF"
+    echo "Updated LightDM to use PNG wallpaper"
+fi
+
+if [ -f "$BG_DIR/user-icon.png" ] && [ -f "$LIGHTDM_CONF" ]; then
+    sed -i 's|user-icon.svg|user-icon.png|g' "$LIGHTDM_CONF"
+    echo "Updated LightDM to use PNG user icon"
+fi
+
+# Create symlink for default background
+ln -sf "$BG_DIR/wallpaper.png" /usr/share/backgrounds/default.png 2>/dev/null || true
+
+echo "Branding setup complete!"

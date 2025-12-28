@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=AI Rescue
+Description=AI Rescue Linux boot splash with modern dark theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/ai-rescue
+ScriptFile=/usr/share/plymouth/themes/ai-rescue/ai-rescue.script

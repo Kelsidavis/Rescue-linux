@@ -44,3 +44,10 @@ udisks2
 
 # Man pages
 man-db
+
+# Boot splash
+plymouth
+plymouth-theme-spinner
+
+# Image conversion for branding
+librsvg2-bin
