@@ -12,10 +12,9 @@ gparted
 parted
 gdisk
 
-# Boot Repair
+# Boot Repair (grub-pc and grub-efi conflict - use grub2-common for utilities)
 grub2-common
-grub-pc
-grub-efi-amd64
+# grub-pc and grub-efi-amd64 conflict - install as needed when chrooted
 efibootmgr
 os-prober
 # Note: boot-repair requires PPA - our ai-grub script provides similar functionality
