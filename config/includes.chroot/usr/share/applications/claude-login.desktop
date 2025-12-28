@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Claude Login
+Comment=Login with Claude Max/Pro subscription
+Exec=xfce4-terminal -e "claude-login"
+Icon=preferences-system-network
+Terminal=false
+Type=Application
+Categories=System;Settings;
+Keywords=claude;login;ai;

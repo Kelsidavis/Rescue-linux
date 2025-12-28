@@ -1,0 +1,36 @@
+#!/bin/bash
+# Claude Max Login Helper
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║              Claude Max / Pro Login                          ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "This will open a browser to authenticate with your Claude account."
+echo ""
+echo "Requirements:"
+echo "  - Active Claude Max or Pro subscription"
+echo "  - Working internet connection"
+echo "  - Web browser (Firefox included)"
+echo ""
+read -p "Press Enter to start login..."
+
+# Run claude login
+if command -v claude &> /dev/null; then
+    claude login
+
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo "✓ Login successful!"
+        echo ""
+        echo "You can now use Claude Code:"
+        echo "  claude          - Interactive mode"
+        echo "  ai-repair       - AI-assisted repair"
+        echo ""
+    else
+        echo ""
+        echo "Login may have failed. Try again or check your subscription."
+    fi
+else
+    echo "Claude Code not found. It may need to be installed:"
+    echo "  npm install -g @anthropic-ai/claude-code"
+fi

@@ -13,6 +13,7 @@ cp /usr/share/applications/ai-repair.desktop /home/rescue/Desktop/
 cp /usr/share/applications/ai-diagnose.desktop /home/rescue/Desktop/
 cp /usr/share/applications/ai-chroot.desktop /home/rescue/Desktop/
 cp /usr/share/applications/ai-mount.desktop /home/rescue/Desktop/
+cp /usr/share/applications/claude-login.desktop /home/rescue/Desktop/
 
 # Add GParted to desktop
 cat > /home/rescue/Desktop/gparted.desktop << 'EOF'
