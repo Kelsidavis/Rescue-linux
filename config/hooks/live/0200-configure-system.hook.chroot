@@ -93,6 +93,11 @@ systemctl enable ssh
 # Setup user home directory
 USER_HOME="/home/$RESCUE_USER"
 
+# Copy XFCE configuration from skel
+if [ -d /etc/skel/.config ]; then
+    cp -r /etc/skel/.config "$USER_HOME/"
+fi
+
 # Create desktop autostart for terminal with welcome
 mkdir -p "$USER_HOME/.config/autostart"
 cat > "$USER_HOME/.config/autostart/welcome-terminal.desktop" << 'EOF'
@@ -132,8 +137,8 @@ if [ -z "$AI_RESCUE_WELCOMED" ]; then
     export AI_RESCUE_WELCOMED=1
 fi
 
-# Prompt
-PS1='\[\033[1;36m\]AI-Rescue\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]\$ '
+# Custom prompt with AI Rescue branding
+PS1='\[\033[38;5;43m\][\[\033[38;5;141m\]AI-Rescue\[\033[38;5;43m\]]\[\033[0m\] \[\033[38;5;75m\]\w\[\033[0m\] \[\033[38;5;43m\]>\[\033[0m\] '
 BASHRC
 
 # Set ownership

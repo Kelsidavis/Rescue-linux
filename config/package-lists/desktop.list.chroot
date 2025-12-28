@@ -20,3 +20,9 @@ ristretto
 fonts-ubuntu
 fonts-dejavu
 fonts-liberation
+
+# Themes and Icons
+papirus-icon-theme
+adwaita-icon-theme
+gnome-themes-extra
+dmz-cursor-theme
