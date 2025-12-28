@@ -45,3 +45,6 @@ config/includes.chroot/etc/ai-rescue/
 **/custom-password
 .lock
 wget-log*
+chroot.headers
+chroot.packages.install
+chroot.packages.live
