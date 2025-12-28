@@ -6,7 +6,7 @@ zfs-initramfs
 sleuthkit
 scalpel
 binwalk
-bulk-extractor
+# bulk-extractor (not available in noble)
 recoverjpeg
 magicrescue
 
