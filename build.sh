@@ -64,9 +64,9 @@ clean_stale_files() {
         fi
     done
 
-    # Remove lock files
-    find . -name "lock" -o -name ".lock" 2>/dev/null | while read -r lockfile; do
-        echo "  Removing lock: $lockfile"
+    # Remove lock files (but not directories named lock)
+    find . -type f \( -name "lock" -o -name ".lock" \) 2>/dev/null | while read -r lockfile; do
+        echo "  Removing lock file: $lockfile"
         rm -f "$lockfile"
     done
     rm -f .build/lock 2>/dev/null || true
