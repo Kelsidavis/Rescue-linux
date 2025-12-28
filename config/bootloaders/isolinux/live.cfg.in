@@ -1,0 +1,21 @@
+label live-@FLAVOUR@
+	menu label ^AI Rescue Linux
+	menu default
+	kernel @KERNEL@
+	append initrd=@INITRD@ boot=live components quiet splash @LB_BOOTAPPEND_LIVE@
+
+label live-@FLAVOUR@-safe
+	menu label AI Rescue - ^Safe Mode (no graphics drivers)
+	kernel @KERNEL@
+	append initrd=@INITRD@ boot=live components nomodeset @LB_BOOTAPPEND_LIVE@
+
+label live-@FLAVOUR@-toram
+	menu label AI Rescue - Copy to ^RAM (slow boot, fast run)
+	kernel @KERNEL@
+	append initrd=@INITRD@ boot=live components toram quiet splash @LB_BOOTAPPEND_LIVE@
+
+label live-@FLAVOUR@-failsafe
+	menu label AI Rescue - ^Failsafe Mode
+	kernel @KERNEL@
+	append initrd=@INITRD@ boot=live components @LB_BOOTAPPEND_LIVE@ @LB_BOOTAPPEND_FAILSAFE@
+
