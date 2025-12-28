@@ -1,0 +1,102 @@
+# ===========================================
+# FIRMWARE & DRIVERS FOR MAXIMUM COMPATIBILITY
+# Ubuntu 24.04 (Noble) package names
+# ===========================================
+
+# -----------------------------------------
+# CORE FIRMWARE (essential - includes most WiFi)
+# -----------------------------------------
+linux-firmware
+fwupd
+fwupd-signed
+
+# -----------------------------------------
+# WIFI DRIVERS
+# -----------------------------------------
+# Broadcom (MacBooks, many laptops)
+broadcom-sta-dkms
+
+# B43 driver for older Broadcom
+b43-fwcutter
+
+# -----------------------------------------
+# NVIDIA GRAPHICS
+# -----------------------------------------
+nvidia-driver-550
+nvidia-utils-550
+nvidia-settings
+
+# Fallback open-source driver (always works)
+xserver-xorg-video-nouveau
+
+# -----------------------------------------
+# AMD GRAPHICS (open source - usually best)
+# -----------------------------------------
+xserver-xorg-video-amdgpu
+xserver-xorg-video-ati
+libdrm-amdgpu1
+mesa-vulkan-drivers
+libvulkan1
+
+# -----------------------------------------
+# INTEL GRAPHICS
+# -----------------------------------------
+xserver-xorg-video-intel
+intel-media-va-driver
+intel-gpu-tools
+
+# -----------------------------------------
+# GENERIC/VM/FALLBACK VIDEO
+# -----------------------------------------
+xserver-xorg-video-vesa
+xserver-xorg-video-fbdev
+xserver-xorg-video-vmware
+xserver-xorg-video-qxl
+
+# -----------------------------------------
+# STORAGE CONTROLLERS & TOOLS
+# -----------------------------------------
+nvme-cli
+hdparm
+sdparm
+multipath-tools
+sg3-utils
+open-iscsi
+lsscsi
+
+# -----------------------------------------
+# USB SUPPORT
+# -----------------------------------------
+usb-modeswitch
+usb-modeswitch-data
+libusb-1.0-0
+
+# -----------------------------------------
+# BLUETOOTH
+# -----------------------------------------
+bluez
+bluez-tools
+blueman
+
+# -----------------------------------------
+# THUNDERBOLT/USB-C
+# -----------------------------------------
+bolt
+
+# -----------------------------------------
+# TPM (for encrypted systems)
+# -----------------------------------------
+tpm2-tools
+
+# -----------------------------------------
+# DKMS (build drivers on-the-fly)
+# -----------------------------------------
+dkms
+build-essential
+linux-headers-generic
+
+# -----------------------------------------
+# HARDWARE MONITORING
+# -----------------------------------------
+lm-sensors
+i2c-tools
