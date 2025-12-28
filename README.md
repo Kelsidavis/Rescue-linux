@@ -173,7 +173,7 @@ cd Rescue-linux
 
 # Install dependencies
 sudo apt install live-build debootstrap xorriso isolinux syslinux-efi \
-                 grub-pc-bin grub-efi-amd64-bin mtools squashfs-tools
+                 grub-pc-bin grub-efi-amd64-bin mtools squashfs-tools syslinux-utils
 
 # Optional: Configure API keys to embed in ISO
 ./configure.sh
@@ -183,6 +183,29 @@ sudo ./build.sh
 ```
 
 Build takes 15-30 minutes. Output: `ai-rescue-linux.iso` (~3-4GB)
+
+### Build Script Options
+
+| Option | Description |
+|--------|-------------|
+| `--force` | Force deep clean before building (recommended for fresh builds) |
+| `--clean` | Clean build artifacts only, don't build |
+| `--skip-config` | Skip API key configuration prompts |
+| `-h, --help` | Show help message |
+
+**Examples:**
+```bash
+# Full clean rebuild (recommended if previous build failed)
+sudo ./build.sh --force --skip-config
+
+# Just clean all build artifacts
+sudo ./build.sh --clean
+
+# Normal incremental build
+sudo ./build.sh
+```
+
+The build script automatically cleans stale mounts, lock files, and cached bootloader files that can cause build failures.
 
 ### Pre-Configuration (Optional)
 
