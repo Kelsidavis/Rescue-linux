@@ -6,7 +6,7 @@
 
 An AI-powered live Linux distribution designed for repairing and recovering broken Linux (and Windows) installations. Combines traditional rescue tools with modern AI assistants for guided troubleshooting.
 
-![AI Rescue Linux Banner](docs/images/banner.png)
+![AI Rescue Linux Banner](docs/images/banner.svg)
 
 ## Features
 
