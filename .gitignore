@@ -44,3 +44,4 @@ config/includes.chroot/etc/ai-rescue/
 **/credentials.env
 **/custom-password
 .lock
+wget-log*
