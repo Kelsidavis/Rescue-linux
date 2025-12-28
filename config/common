@@ -84,8 +84,8 @@ LB_FDISK="fdisk"
 LB_LOSETUP="losetup"
 
 # $LB_MODE: set distribution mode
-# (Default: debian - avoids gfxboot requirement, still uses Ubuntu packages)
-LB_MODE="debian"
+# (Default: ubuntu)
+LB_MODE="ubuntu"
 
 # $LB_SYSTEM: set system type
 # (Default: live)

@@ -1,0 +1,18 @@
+#!/bin/sh
+# Create bootlogo file for gfxboot before syslinux stage
+# This hook runs during binary stage
+
+set -e
+
+echo "Creating bootlogo for gfxboot..."
+
+# Create the bootlogo directory if it doesn't exist
+mkdir -p binary/isolinux
+
+# Create an empty cpio archive as bootlogo
+cd binary/isolinux
+echo "empty" > .empty
+echo .empty | cpio --quiet -o > bootlogo
+rm -f .empty
+
+echo "Bootlogo created successfully"
