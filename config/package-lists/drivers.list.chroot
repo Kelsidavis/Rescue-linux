@@ -20,13 +20,10 @@ broadcom-sta-dkms
 b43-fwcutter
 
 # -----------------------------------------
-# NVIDIA GRAPHICS
+# NVIDIA GRAPHICS (open source nouveau driver)
 # -----------------------------------------
-nvidia-driver-550
-nvidia-utils-550
-nvidia-settings
-
-# Fallback open-source driver (always works)
+# Note: Proprietary drivers require PPA which has key issues
+# Users can install nvidia-driver-XXX manually after boot if needed
 xserver-xorg-video-nouveau
 
 # -----------------------------------------
