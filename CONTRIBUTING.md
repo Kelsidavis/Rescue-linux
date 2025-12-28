@@ -5,13 +5,13 @@ Thank you for your interest in contributing! This document provides guidelines f
 ## Ways to Contribute
 
 ### Reporting Bugs
-- Check existing [issues](https://github.com/YOUR_USERNAME/ai-rescue-linux/issues) first
+- Check existing [issues](https://github.com/Kelsidavis/Rescue-linux/issues) first
 - Include your build environment (OS, live-build version)
 - Provide steps to reproduce
 - Attach relevant logs from `build.log`
 
 ### Suggesting Features
-- Open a [discussion](https://github.com/YOUR_USERNAME/ai-rescue-linux/discussions) first
+- Open a [discussion](https://github.com/Kelsidavis/Rescue-linux/discussions) first
 - Explain the use case
 - Consider if it fits the rescue/recovery focus
 
@@ -35,7 +35,7 @@ sudo apt install live-build debootstrap xorriso isolinux syslinux-efi \
 
 ### Building
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-rescue-linux.git
+git clone https://github.com/Kelsidavis/Rescue-linux.git
 cd ai-rescue-linux
 sudo ./build.sh
 ```
@@ -136,7 +136,7 @@ Prefixes:
 
 ## Questions?
 
-- Open a [Discussion](https://github.com/YOUR_USERNAME/ai-rescue-linux/discussions)
+- Open a [Discussion](https://github.com/Kelsidavis/Rescue-linux/discussions)
 - Check existing documentation
 - Review closed issues/PRs
 

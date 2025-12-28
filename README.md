@@ -49,7 +49,7 @@ All helpers provide interactive, menu-driven interfaces:
 ## Quick Start
 
 ### Download
-Download the latest ISO from the [Releases](https://github.com/YOUR_USERNAME/ai-rescue-linux/releases) page.
+Download the latest ISO from the [Releases](https://github.com/Kelsidavis/Rescue-linux/releases) page.
 
 ### Create Bootable USB
 
@@ -168,7 +168,7 @@ ai-smart
 ### Build Steps
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/ai-rescue-linux.git
+git clone https://github.com/Kelsidavis/Rescue-linux.git
 cd ai-rescue-linux
 
 # Install dependencies
@@ -284,8 +284,8 @@ Individual packages included in the ISO retain their original licenses.
 
 ## Support
 
-- [GitHub Issues](https://github.com/YOUR_USERNAME/ai-rescue-linux/issues) - Bug reports and features
-- [Discussions](https://github.com/YOUR_USERNAME/ai-rescue-linux/discussions) - Questions and help
+- [GitHub Issues](https://github.com/Kelsidavis/Rescue-linux/issues) - Bug reports and features
+- [Discussions](https://github.com/Kelsidavis/Rescue-linux/discussions) - Questions and help
 
 ---
 
