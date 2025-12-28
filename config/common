@@ -72,8 +72,8 @@ LB_INITRAMFS="live-boot"
 LB_INITRAMFS_COMPRESSION=""
 
 # $LB_INITSYSTEM: set init system
-# (Default: )
-LB_INITSYSTEM=""
+# (Default: systemd for Ubuntu 24.04)
+LB_INITSYSTEM="systemd"
 
 # $LB_FDISK: set fdisk program
 # (Default: autodetected)
