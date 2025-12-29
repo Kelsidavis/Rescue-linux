@@ -92,7 +92,7 @@ mem_avail=$(free -h | awk '/^Mem:/ {print $7}')
 echo -e "  ${GRAY}Memory${NC}    ${GREEN}$mem_avail${NC} available ${GRAY}/ $mem_total total${NC}"
 
 # Disks
-disk_count=$(lsblk -d -n -o NAME | grep -E '^(sd|nvme|vd|mmcblk)' | wc -l)
+disk_count=$(lsblk -d -n -o NAME | grep -cE '^(sd|nvme|vd|mmcblk)')
 echo -e "  ${GRAY}Disks${NC}     ${GREEN}$disk_count${NC} storage device(s) detected"
 
 # Network

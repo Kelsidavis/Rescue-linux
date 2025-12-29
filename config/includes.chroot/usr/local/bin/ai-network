@@ -33,7 +33,7 @@ echo ""
 
 # DNS
 echo "═══ DNS Servers ═══"
-cat /etc/resolv.conf | grep nameserver
+grep nameserver /etc/resolv.conf
 echo ""
 
 echo "Options:"
@@ -44,16 +44,16 @@ echo "  4. Run speed test"
 echo "  5. Scan local network"
 echo "  6. Test port connectivity"
 echo ""
-read -p "Select [1-6] or Enter to exit: " opt
+read -rp "Select [1-6] or Enter to exit: " opt
 
 case $opt in
     1) nmtui ;;
     2) nmtui-connect ;;
     3)
-        read -p "Interface (e.g., eth0): " iface
-        read -p "IP Address (e.g., 192.168.1.100/24): " ipaddr
-        read -p "Gateway: " gw
-        read -p "DNS (e.g., 8.8.8.8): " dns
+        read -rp "Interface (e.g., eth0): " iface
+        read -rp "IP Address (e.g., 192.168.1.100/24): " ipaddr
+        read -rp "Gateway: " gw
+        read -rp "DNS (e.g., 8.8.8.8): " dns
         ip addr add "$ipaddr" dev "$iface"
         ip route add default via "$gw"
         echo "nameserver $dns" > /etc/resolv.conf
@@ -67,12 +67,12 @@ case $opt in
         fi
         ;;
     5)
-        read -p "Network to scan (e.g., 192.168.1.0/24): " net
+        read -rp "Network to scan (e.g., 192.168.1.0/24): " net
         nmap -sn "$net"
         ;;
     6)
-        read -p "Host: " host
-        read -p "Port: " port
+        read -rp "Host: " host
+        read -rp "Port: " port
         nc -zv "$host" "$port"
         ;;
 esac

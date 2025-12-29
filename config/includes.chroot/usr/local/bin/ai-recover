@@ -16,7 +16,7 @@ echo "  6. scalpel - Advanced file carving"
 echo "  7. recoverjpeg - Recover JPEG images"
 echo "  8. fatcat - Recover from FAT filesystems"
 echo ""
-read -p "Select method [1-8]: " opt
+read -rp "Select method [1-8]: " opt
 
 case $opt in
     1)
@@ -27,47 +27,47 @@ case $opt in
     2)
         echo "Available disks/partitions:"
         lsblk -o NAME,SIZE,FSTYPE
-        read -p "Source device (e.g., sda1): " src
-        read -p "Recovery output directory: " outdir
+        read -rp "Source device (e.g., sda1): " src
+        read -rp "Recovery output directory: " outdir
         mkdir -p "$outdir"
         photorec /d "$outdir" /dev/$src
         ;;
     3)
         echo "ext3/ext4 undelete tool"
-        read -p "Source partition (e.g., sda1): " src
-        read -p "Output directory: " outdir
+        read -rp "Source partition (e.g., sda1): " src
+        read -rp "Output directory: " outdir
         mkdir -p "$outdir"
         extundelete /dev/$src --restore-all --output-dir "$outdir"
         ;;
     4)
         echo "ext4magic recovery"
-        read -p "Source partition: " src
-        read -p "Output directory: " outdir
+        read -rp "Source partition: " src
+        read -rp "Output directory: " outdir
         mkdir -p "$outdir"
         ext4magic /dev/$src -r -d "$outdir"
         ;;
     5)
-        read -p "Source device or image: " src
-        read -p "Output directory: " outdir
+        read -rp "Source device or image: " src
+        read -rp "Output directory: " outdir
         mkdir -p "$outdir"
         foremost -i "$src" -o "$outdir"
         ;;
     6)
-        read -p "Source device or image: " src
-        read -p "Output directory: " outdir
+        read -rp "Source device or image: " src
+        read -rp "Output directory: " outdir
         mkdir -p "$outdir"
         scalpel "$src" -o "$outdir"
         ;;
     7)
-        read -p "Source device: " src
-        read -p "Output directory: " outdir
+        read -rp "Source device: " src
+        read -rp "Output directory: " outdir
         mkdir -p "$outdir"
         recoverjpeg /dev/$src
-        mv *.jpg "$outdir/" 2>/dev/null
+        mv ./*.jpg "$outdir/" 2>/dev/null
         ;;
     8)
-        read -p "FAT partition: " src
-        read -p "Output directory: " outdir
+        read -rp "FAT partition: " src
+        read -rp "Output directory: " outdir
         mkdir -p "$outdir"
         fatcat /dev/$src -u -o "$outdir"
         ;;

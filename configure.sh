@@ -20,7 +20,7 @@ echo ""
 echo "WARNING: Anyone with access to the ISO can extract these keys."
 echo "         Only use for personal rescue USBs, not public distribution."
 echo ""
-read -p "Continue? [y/N]: " confirm
+read -rp "Continue? [y/N]: " confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
     echo "Configuration cancelled."
     exit 0
@@ -46,7 +46,7 @@ echo ""
 # Anthropic (Claude)
 echo "1. Anthropic (Claude Code) - RECOMMENDED"
 echo "   Get key at: https://console.anthropic.com/"
-read -p "   ANTHROPIC_API_KEY: " ANTHROPIC_KEY
+read -rp "   ANTHROPIC_API_KEY: " ANTHROPIC_KEY
 if [ -n "$ANTHROPIC_KEY" ]; then
     echo "export ANTHROPIC_API_KEY='$ANTHROPIC_KEY'" >> "$CONFIG_FILE"
     echo "   ✓ Saved"
@@ -59,7 +59,7 @@ echo ""
 # OpenAI
 echo "2. OpenAI (GPT-4, Codex)"
 echo "   Get key at: https://platform.openai.com/api-keys"
-read -p "   OPENAI_API_KEY: " OPENAI_KEY
+read -rp "   OPENAI_API_KEY: " OPENAI_KEY
 if [ -n "$OPENAI_KEY" ]; then
     echo "export OPENAI_API_KEY='$OPENAI_KEY'" >> "$CONFIG_FILE"
     echo "   ✓ Saved"
@@ -72,7 +72,7 @@ echo ""
 # Google (Gemini)
 echo "3. Google (Gemini)"
 echo "   Get key at: https://aistudio.google.com/apikey"
-read -p "   GOOGLE_API_KEY: " GOOGLE_KEY
+read -rp "   GOOGLE_API_KEY: " GOOGLE_KEY
 if [ -n "$GOOGLE_KEY" ]; then
     echo "export GOOGLE_API_KEY='$GOOGLE_KEY'" >> "$CONFIG_FILE"
     echo "export GEMINI_API_KEY='$GOOGLE_KEY'" >> "$CONFIG_FILE"
@@ -86,7 +86,7 @@ echo ""
 # GitHub (Copilot)
 echo "4. GitHub Token (for Copilot CLI)"
 echo "   Get token at: https://github.com/settings/tokens"
-read -p "   GITHUB_TOKEN: " GITHUB_TOKEN
+read -rp "   GITHUB_TOKEN: " GITHUB_TOKEN
 if [ -n "$GITHUB_TOKEN" ]; then
     echo "export GITHUB_TOKEN='$GITHUB_TOKEN'" >> "$CONFIG_FILE"
     echo "   ✓ Saved"
@@ -102,7 +102,7 @@ echo ""
 
 # Custom username
 echo "5. Custom username (default: rescue)"
-read -p "   Username: " CUSTOM_USER
+read -rp "   Username: " CUSTOM_USER
 if [ -n "$CUSTOM_USER" ]; then
     echo "$CUSTOM_USER" > "$CONFIG_DIR/custom-username"
     echo "   ✓ Will create user: $CUSTOM_USER"
@@ -114,7 +114,7 @@ echo ""
 
 # Custom password
 echo "6. Custom password (default: rescue)"
-read -s -p "   Password: " CUSTOM_PASS
+read -rs -p "   Password: " CUSTOM_PASS
 echo ""
 if [ -n "$CUSTOM_PASS" ]; then
     echo "$CUSTOM_PASS" > "$CONFIG_DIR/custom-password"
@@ -128,7 +128,7 @@ echo ""
 # Timezone
 echo "7. Timezone (default: UTC)"
 echo "   Examples: America/New_York, Europe/London, Asia/Tokyo"
-read -p "   Timezone: " CUSTOM_TZ
+read -rp "   Timezone: " CUSTOM_TZ
 if [ -n "$CUSTOM_TZ" ]; then
     echo "$CUSTOM_TZ" > "$CONFIG_DIR/custom-timezone"
     echo "   ✓ Timezone: $CUSTOM_TZ"
@@ -141,7 +141,7 @@ echo ""
 # Keyboard layout
 echo "8. Keyboard layout (default: us)"
 echo "   Examples: us, uk, de, fr, es"
-read -p "   Layout: " CUSTOM_KB
+read -rp "   Layout: " CUSTOM_KB
 if [ -n "$CUSTOM_KB" ]; then
     echo "$CUSTOM_KB" > "$CONFIG_DIR/custom-keyboard"
     echo "   ✓ Keyboard: $CUSTOM_KB"
@@ -158,7 +158,7 @@ echo ""
 echo "9. Pre-download Ollama model for offline use?"
 echo "   This will increase ISO size but enable offline AI."
 echo "   Models: llama2 (~4GB), mistral (~4GB), phi (~1.5GB)"
-read -p "   Model name (or blank to skip): " OLLAMA_MODEL
+read -rp "   Model name (or blank to skip): " OLLAMA_MODEL
 if [ -n "$OLLAMA_MODEL" ]; then
     echo "$OLLAMA_MODEL" > "$CONFIG_DIR/ollama-model"
     echo "   ✓ Will include: $OLLAMA_MODEL (adds ~4GB to ISO)"

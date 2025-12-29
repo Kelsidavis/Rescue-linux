@@ -12,13 +12,11 @@ echo "  - Active Claude Max or Pro subscription"
 echo "  - Working internet connection"
 echo "  - Web browser (Firefox included)"
 echo ""
-read -p "Press Enter to start login..."
+read -rp "Press Enter to start login..."
 
 # Run claude login
 if command -v claude &> /dev/null; then
-    claude login
-
-    if [ $? -eq 0 ]; then
+    if claude login; then
         echo ""
         echo "✓ Login successful!"
         echo ""

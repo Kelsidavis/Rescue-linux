@@ -86,8 +86,8 @@ clean_stale_files() {
 echo "Checking dependencies..."
 MISSING_DEPS=()
 for cmd in lb debootstrap xorriso mksquashfs; do
-    if ! command -v $cmd &> /dev/null; then
-        MISSING_DEPS+=($cmd)
+    if ! command -v "$cmd" &> /dev/null; then
+        MISSING_DEPS+=("$cmd")
     fi
 done
 
@@ -109,7 +109,7 @@ if [ "$CLEAN_ONLY" = true ]; then
     echo "Performing full clean..."
     clean_stale_files
     lb clean --purge 2>/dev/null || true
-    rm -f *.iso build.log 2>/dev/null || true
+    rm -f ./*.iso build.log 2>/dev/null || true
     echo ""
     echo "Clean complete."
     exit 0
@@ -138,7 +138,7 @@ if [ "$SKIP_CONFIG" = false ]; then
         echo "  1. Configure now (run ./configure.sh)"
         echo "  2. Build without embedded keys (users configure on boot)"
         echo ""
-        read -p "Would you like to configure API keys now? [y/N]: " configure
+        read -rp "Would you like to configure API keys now? [y/N]: " configure
 
         if [[ "$configure" =~ ^[Yy]$ ]]; then
             # Run configure as the original user, not root
@@ -149,7 +149,7 @@ if [ "$SKIP_CONFIG" = false ]; then
 
             if [ ! -f "$CONFIG_DIR/credentials.env" ]; then
                 echo "Configuration was cancelled or failed."
-                read -p "Continue building without configuration? [y/N]: " cont
+                read -rp "Continue building without configuration? [y/N]: " cont
                 if [[ ! "$cont" =~ ^[Yy]$ ]]; then
                     echo "Build cancelled."
                     exit 0
@@ -180,7 +180,7 @@ if [ "$SKIP_CONFIG" = false ]; then
             echo "  ✓ Timezone: $(cat "$CONFIG_DIR/custom-timezone")"
         fi
         echo ""
-        read -p "Use this configuration? [Y/n]: " use_config
+        read -rp "Use this configuration? [Y/n]: " use_config
         if [[ "$use_config" =~ ^[Nn]$ ]]; then
             echo "Run ./configure.sh to reconfigure, then run this script again."
             exit 0

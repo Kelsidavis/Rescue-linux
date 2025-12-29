@@ -27,7 +27,7 @@ if command -v rsvg-convert &> /dev/null; then
     fi
 
     # Clean up SVGs
-    rm -f *.svg
+    rm -f ./*.svg
 else
     echo "Warning: rsvg-convert not found, creating placeholder PNGs"
     # Create simple placeholder images using ImageMagick if available
