@@ -1,0 +1,182 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  ISO_NAME: ai-rescue-linux
+
+jobs:
+  build-release:
+    name: Build Release ISO
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      iso_size: ${{ steps.iso_info.outputs.size }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building release version: $VERSION"
+
+      - name: Free up disk space
+        run: |
+          echo "==> Freeing up disk space..."
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            live-build \
+            debootstrap \
+            xorriso \
+            isolinux \
+            syslinux-efi \
+            grub-pc-bin \
+            grub-efi-amd64-bin \
+            mtools \
+            squashfs-tools \
+            syslinux-utils \
+            dosfstools \
+            parted
+
+      - name: Build ISO
+        run: |
+          echo "==> Building release ISO v${{ steps.version.outputs.version }}..."
+          sudo ./build.sh --force --skip-config
+
+          if [[ ! -f "${ISO_NAME}.iso" ]]; then
+            echo "ERROR: ISO build failed"
+            exit 1
+          fi
+
+      - name: Rename ISO with version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          mv ${ISO_NAME}.iso ${ISO_NAME}-${VERSION}.iso
+          echo "ISO_FILE=${ISO_NAME}-${VERSION}.iso" >> $GITHUB_ENV
+
+      - name: Get ISO info
+        id: iso_info
+        run: |
+          SIZE=$(ls -lh ${{ env.ISO_FILE }} | awk '{print $5}')
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+          echo "ISO Size: $SIZE"
+
+      - name: Generate checksums
+        run: |
+          sha256sum ${{ env.ISO_FILE }} > ${{ env.ISO_FILE }}.sha256
+          md5sum ${{ env.ISO_FILE }} > ${{ env.ISO_FILE }}.md5
+
+          echo "SHA256:"
+          cat ${{ env.ISO_FILE }}.sha256
+          echo ""
+          echo "MD5:"
+          cat ${{ env.ISO_FILE }}.md5
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.version }}
+          path: |
+            ${{ env.ISO_FILE }}
+            ${{ env.ISO_FILE }}.sha256
+            ${{ env.ISO_FILE }}.md5
+          retention-days: 1
+          compression-level: 0
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-release
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.build-release.outputs.version }}
+
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          VERSION="${{ needs.build-release.outputs.version }}"
+          echo "Extracting changelog for v${VERSION}..."
+
+          # Extract the changelog section for this version
+          if [[ -f "CHANGELOG.md" ]]; then
+            # Get content between this version header and the next version header
+            NOTES=$(awk "/^## \[${VERSION}\]|^## \[v${VERSION}\]/,/^## \[/{if(/^## \[/ && !/\[${VERSION}\]/ && !/\[v${VERSION}\]/)exit; print}" CHANGELOG.md | tail -n +2)
+
+            if [[ -z "$NOTES" ]]; then
+              NOTES="Release v${VERSION} of AI Rescue Linux."
+            fi
+          else
+            NOTES="Release v${VERSION} of AI Rescue Linux."
+          fi
+
+          # Write to file for multiline support
+          echo "$NOTES" > release_notes.md
+          echo "Release notes extracted"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: AI Rescue Linux v${{ needs.build-release.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
+          files: |
+            ${{ env.ISO_NAME }}-${{ needs.build-release.outputs.version }}.iso
+            ${{ env.ISO_NAME }}-${{ needs.build-release.outputs.version }}.iso.sha256
+            ${{ env.ISO_NAME }}-${{ needs.build-release.outputs.version }}.iso.md5
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISO_NAME: ai-rescue-linux
+
+  release-summary:
+    name: Release Summary
+    runs-on: ubuntu-latest
+    needs: [build-release, create-release]
+    if: success()
+
+    steps:
+      - name: Post release summary
+        run: |
+          VERSION="${{ needs.build-release.outputs.version }}"
+          SIZE="${{ needs.build-release.outputs.iso_size }}"
+
+          echo "## Release Published! :tada:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "**ISO Size:** ${SIZE}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Downloads" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Release](https://github.com/${{ github.repository }}/releases/tag/v${VERSION})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Verification" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Verify SHA256" >> $GITHUB_STEP_SUMMARY
+          echo "sha256sum -c ai-rescue-linux-${VERSION}.iso.sha256" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,102 @@
+name: Build ARM64 ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'standard'
+        type: choice
+        options:
+          - standard
+          - force-clean
+
+env:
+  ISO_NAME: ai-rescue-linux-arm64
+
+jobs:
+  build-arm64:
+    name: Build ARM64 ISO (QEMU)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180  # ARM64 builds take longer due to QEMU emulation
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "==> Freeing up disk space..."
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            live-build \
+            debootstrap \
+            xorriso \
+            mtools \
+            squashfs-tools \
+            dosfstools \
+            qemu-user-static \
+            binfmt-support
+
+          # Verify QEMU is set up for ARM64
+          if [[ ! -f /usr/bin/qemu-aarch64-static ]]; then
+            echo "ERROR: QEMU ARM64 static binary not found"
+            exit 1
+          fi
+
+          # Enable binfmt_misc for ARM64
+          sudo update-binfmts --enable qemu-aarch64 || true
+
+      - name: Build ARM64 ISO
+        run: |
+          echo "==> Starting ARM64 ISO build (this will take a while)..."
+          echo "==> Using QEMU emulation for ARM64 packages..."
+
+          sudo ./build-arm64.sh
+
+          if [[ -f "${ISO_NAME}.iso" ]]; then
+            echo "==> ARM64 ISO built successfully!"
+            ls -lh "${ISO_NAME}.iso"
+          else
+            echo "ERROR: ARM64 ISO file not found after build"
+            exit 1
+          fi
+
+      - name: Generate checksums
+        run: |
+          sha256sum ${ISO_NAME}.iso > ${ISO_NAME}.iso.sha256
+          md5sum ${ISO_NAME}.iso > ${ISO_NAME}.iso.md5
+          cat ${ISO_NAME}.iso.sha256
+
+      - name: Upload ARM64 ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ISO_NAME }}-${{ github.sha }}
+          path: |
+            ${{ env.ISO_NAME }}.iso
+            ${{ env.ISO_NAME }}.iso.sha256
+            ${{ env.ISO_NAME }}.iso.md5
+          retention-days: 7
+          compression-level: 0
+
+      - name: Build summary
+        run: |
+          echo "## ARM64 Build Complete! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** ARM64 builds use QEMU emulation and take significantly longer than x86_64 builds." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Testing" >> $GITHUB_STEP_SUMMARY
+          echo "Test this ISO on ARM64 hardware such as:" >> $GITHUB_STEP_SUMMARY
+          echo "- Raspberry Pi 4/5" >> $GITHUB_STEP_SUMMARY
+          echo "- Apple Silicon Macs (via UTM/Parallels)" >> $GITHUB_STEP_SUMMARY
+          echo "- AWS Graviton instances" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,212 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  shellcheck:
+    name: Shell Script Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint shell scripts
+        run: |
+          echo "==> Running ShellCheck on scripts..."
+
+          # Find all shell scripts
+          SCRIPTS=$(find . -type f \( -name "*.sh" -o -name "*.hook.chroot" -o -name "*.hook.binary" \) \
+            ! -path "./.git/*" \
+            ! -path "./cache/*" \
+            ! -path "./chroot/*")
+
+          # Also check scripts in includes.chroot/usr/local/bin
+          if [[ -d "config/includes.chroot/usr/local/bin" ]]; then
+            for script in config/includes.chroot/usr/local/bin/*; do
+              if [[ -f "$script" ]] && head -1 "$script" | grep -q "^#!/.*sh"; then
+                SCRIPTS="$SCRIPTS $script"
+              fi
+            done
+          fi
+
+          EXIT_CODE=0
+          for script in $SCRIPTS; do
+            echo "Checking: $script"
+            # Use -x to follow sourced files, -e to exclude some common false positives
+            if ! shellcheck -x -e SC1091,SC2034,SC2086 "$script"; then
+              EXIT_CODE=1
+            fi
+          done
+
+          exit $EXIT_CODE
+
+  validate-config:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate live-build configuration
+        run: |
+          echo "==> Validating live-build configuration..."
+
+          errors=0
+
+          # Check required configuration files
+          echo "Checking required files..."
+          for file in config/binary config/bootstrap config/chroot; do
+            if [[ ! -f "$file" ]]; then
+              echo "ERROR: Missing required file: $file"
+              errors=$((errors + 1))
+            else
+              echo "  OK: $file"
+            fi
+          done
+
+          # Check package lists exist and are not empty
+          echo "Checking package lists..."
+          if [[ -d "config/package-lists" ]]; then
+            for list in config/package-lists/*.list.chroot; do
+              if [[ -f "$list" ]]; then
+                # Check for non-comment, non-empty lines
+                if ! grep -qE "^[^#]" "$list"; then
+                  echo "WARNING: Package list appears empty: $list"
+                else
+                  pkg_count=$(grep -cE "^[^#]" "$list" || echo 0)
+                  echo "  OK: $list ($pkg_count packages)"
+                fi
+              fi
+            done
+          else
+            echo "ERROR: Package lists directory missing"
+            errors=$((errors + 1))
+          fi
+
+          # Check hooks are executable
+          echo "Checking hooks..."
+          for hook in config/hooks/live/*.hook.*; do
+            if [[ -f "$hook" ]]; then
+              if [[ ! -x "$hook" ]]; then
+                echo "WARNING: Hook not executable: $hook"
+              else
+                echo "  OK: $hook"
+              fi
+            fi
+          done
+
+          # Check bootloader configuration
+          echo "Checking bootloader configuration..."
+          if [[ -d "config/bootloaders" ]]; then
+            if [[ -f "config/bootloaders/isolinux/isolinux.cfg" ]] || \
+               [[ -f "config/bootloaders/isolinux/live.cfg" ]]; then
+              echo "  OK: ISOLINUX configuration found"
+            else
+              echo "WARNING: No ISOLINUX configuration found"
+            fi
+          fi
+
+          if [[ $errors -gt 0 ]]; then
+            echo "ERROR: Validation failed with $errors errors"
+            exit 1
+          fi
+
+          echo "==> Configuration validation passed!"
+
+  check-syntax:
+    name: Check Script Syntax
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check bash syntax
+        run: |
+          echo "==> Checking bash script syntax..."
+
+          # Find all shell scripts
+          find . -type f \( -name "*.sh" -o -name "*.hook.chroot" -o -name "*.hook.binary" \) \
+            ! -path "./.git/*" \
+            ! -path "./cache/*" \
+            ! -path "./chroot/*" \
+            -print0 | while IFS= read -r -d '' script; do
+              echo "Syntax check: $script"
+              bash -n "$script"
+            done
+
+          # Check scripts in includes.chroot/usr/local/bin
+          if [[ -d "config/includes.chroot/usr/local/bin" ]]; then
+            for script in config/includes.chroot/usr/local/bin/*; do
+              if [[ -f "$script" ]] && head -1 "$script" | grep -q "^#!/.*bash"; then
+                echo "Syntax check: $script"
+                bash -n "$script"
+              fi
+            done
+          fi
+
+          echo "==> All syntax checks passed!"
+
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for sensitive data
+        run: |
+          echo "==> Checking for potential sensitive data..."
+
+          # Patterns that might indicate secrets
+          patterns=(
+            "sk-ant-"           # Anthropic API key prefix
+            "sk-[a-zA-Z0-9]"    # OpenAI API key prefix
+            "AKIA[A-Z0-9]"      # AWS Access Key
+            "ghp_"              # GitHub Personal Access Token
+            "gho_"              # GitHub OAuth Token
+            "-----BEGIN.*PRIVATE KEY-----"
+          )
+
+          found=0
+          for pattern in "${patterns[@]}"; do
+            if grep -rE "$pattern" --include="*.sh" --include="*.cfg" --include="*.conf" \
+               --exclude-dir=.git . 2>/dev/null; then
+              echo "WARNING: Potential sensitive data pattern found: $pattern"
+              found=1
+            fi
+          done
+
+          # Check for common secret file names
+          secret_files=(
+            ".env"
+            "credentials.json"
+            "secrets.json"
+            "*.pem"
+            "*.key"
+          )
+
+          for pattern in "${secret_files[@]}"; do
+            if find . -name "$pattern" ! -path "./.git/*" 2>/dev/null | grep -q .; then
+              echo "WARNING: Potential secret file found matching: $pattern"
+              find . -name "$pattern" ! -path "./.git/*" 2>/dev/null
+              found=1
+            fi
+          done
+
+          if [[ $found -eq 1 ]]; then
+            echo "WARNING: Review the above findings for potential secrets"
+            echo "This is a warning only - not failing the build"
+          else
+            echo "==> No obvious sensitive data patterns found"
+          fi

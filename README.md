@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Ubuntu Base](https://img.shields.io/badge/Base-Ubuntu%2024.04-orange.svg)](https://ubuntu.com)
 [![AI Powered](https://img.shields.io/badge/AI-Claude%20%7C%20GPT%20%7C%20Gemini-blue.svg)](https://anthropic.com)
+[![Build ISO](https://github.com/Kelsidavis/Rescue-linux/actions/workflows/build.yml/badge.svg)](https://github.com/Kelsidavis/Rescue-linux/actions/workflows/build.yml)
+[![Validate](https://github.com/Kelsidavis/Rescue-linux/actions/workflows/validate.yml/badge.svg)](https://github.com/Kelsidavis/Rescue-linux/actions/workflows/validate.yml)
 
 An AI-powered live Linux distribution designed for repairing and recovering broken Linux (and Windows) installations. Combines traditional rescue tools with modern AI assistants for guided troubleshooting.
 
@@ -262,10 +264,17 @@ config/hooks/live/0400-my-hook.hook.chroot
 ```
 ai-rescue-linux/
 ├── build.sh                          # Build script
+├── build-arm64.sh                    # ARM64 build script
+├── configure.sh                      # Configuration wizard
 ├── README.md                         # This file
 ├── LICENSE                           # MIT License
 ├── CONTRIBUTING.md                   # Contribution guidelines
 ├── CHANGELOG.md                      # Version history
+├── .github/workflows/                # CI/CD pipelines
+│   ├── build.yml                     # Main ISO build
+│   ├── validate.yml                  # Script validation
+│   ├── release.yml                   # Release automation
+│   └── build-arm64.yml               # ARM64 builds
 ├── docs/                             # Documentation
 │   ├── TOOLS.md                      # Tool reference
 │   ├── TROUBLESHOOTING.md            # Common issues
@@ -281,6 +290,36 @@ ai-rescue-linux/
     ├── includes.binary/              # Boot files
     └── package-lists/                # Package lists
 ```
+
+## CI/CD Pipeline
+
+This project uses GitHub Actions for automated builds and releases.
+
+### Workflows
+
+| Workflow | Trigger | Description |
+|----------|---------|-------------|
+| **Build ISO** | Push to main, PRs | Builds full ISO, uploads as artifact |
+| **Validate** | Push, PRs | Lints scripts, validates config, security checks |
+| **Release** | Version tags (`v*.*.*`) | Builds ISO and publishes GitHub Release |
+| **Build ARM64** | Manual trigger | Cross-compiles ARM64 ISO via QEMU |
+
+### Manual Builds
+
+Trigger a build manually from the Actions tab:
+1. Go to **Actions** > **Build ISO**
+2. Click **Run workflow**
+3. Select build type (standard or force-clean)
+
+### Creating a Release
+
+```bash
+# Tag a new version
+git tag -a v1.1.0 -m "Release v1.1.0"
+git push origin v1.1.0
+```
+
+This automatically builds and publishes the ISO to GitHub Releases.
 
 ## System Requirements
 

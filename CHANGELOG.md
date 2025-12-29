@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- GitHub Actions CI/CD pipeline
+  - Automated ISO builds on push/PR to main branch
+  - Script linting with ShellCheck
+  - Configuration validation checks
+  - Security scanning for embedded secrets
+  - Automated releases on version tags
+  - ARM64 build workflow (manual trigger)
+- CI status badges in README
+
 ## [1.0.0] - 2025-12-28
 
 ### Added
