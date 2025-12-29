@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ARM64 build workflow (manual trigger)
 - CI status badges in README
 
+### Changed
+- Switched bootloader from SYSLINUX/ISOLINUX to GRUB2
+  - More reliable boot menu with proper timeout
+  - Better UEFI support
+  - Cleaner menu structure with all boot options
+
+### Removed
+- SYSLINUX/ISOLINUX bootloader configuration
+- gfxboot bootlogo hook (not needed with GRUB2)
+
 ## [1.0.0] - 2025-12-28
 
 ### Added

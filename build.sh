@@ -77,6 +77,7 @@ clean_stale_files() {
 
     # Remove stale binary directory contents that cause conflicts
     rm -rf binary/isolinux 2>/dev/null || true
+    rm -rf binary/boot/grub 2>/dev/null || true
 
     echo "  Done."
 }

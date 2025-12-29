@@ -106,13 +106,10 @@ jobs:
 
           # Check bootloader configuration
           echo "Checking bootloader configuration..."
-          if [[ -d "config/bootloaders" ]]; then
-            if [[ -f "config/bootloaders/isolinux/isolinux.cfg" ]] || \
-               [[ -f "config/bootloaders/isolinux/live.cfg" ]]; then
-              echo "  OK: ISOLINUX configuration found"
-            else
-              echo "WARNING: No ISOLINUX configuration found"
-            fi
+          if [[ -f "config/includes.binary/boot/grub/grub.cfg" ]]; then
+            echo "  OK: GRUB2 configuration found"
+          else
+            echo "WARNING: No GRUB2 configuration found in config/includes.binary/boot/grub/"
           fi
 
           if [[ $errors -gt 0 ]]; then

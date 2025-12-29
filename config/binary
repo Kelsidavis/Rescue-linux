@@ -26,7 +26,8 @@ LB_BOOTAPPEND_FAILSAFE="memtest noapic noapm nodma nomce nolapic nomodeset nosmp
 
 # $LB_BOOTLOADER: set bootloader
 # (Default: syslinux)
-LB_BOOTLOADER="syslinux"
+# Using grub-efi for reliable UEFI and BIOS boot support
+LB_BOOTLOADERS="grub-efi"
 
 # $LB_CHECKSUMS: set checksums
 # (Default: sha256)
@@ -165,7 +166,6 @@ LB_SWAP_FILE_PATH=""
 # (Default: 512)
 LB_SWAP_FILE_SIZE="512"
 
-# $LB_SYSLINUX_THEME: set syslinux theme package
-# (Default: live-build - use built-in theme)
-# Note: ubuntu-oneiric theme not available in Noble, use live-build's internal theme
-LB_SYSLINUX_THEME="live-build"
+# $LB_UEFI_SECURE_BOOT: set uefi secure boot
+# (Default: auto)
+LB_UEFI_SECURE_BOOT="disable"
