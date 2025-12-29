@@ -24,10 +24,27 @@ LB_BOOTAPPEND_INSTALL=""
 # (Default: empty)
 LB_BOOTAPPEND_FAILSAFE="memtest noapic noapm nodma nomce nolapic nomodeset nosmp nosplash vga=normal"
 
-# $LB_BOOTLOADER: set bootloader
+# $LB_BOOTLOADERS: set bootloader
 # (Default: syslinux)
 # Using grub-efi for reliable UEFI and BIOS boot support
 LB_BOOTLOADERS="grub-efi"
+
+# $LB_SYSLINUX_THEME: set syslinux theme
+# (Default: ubuntu-oneiric in ubuntu mode, but package doesn't exist in Noble)
+# Explicitly disable syslinux theme since we're using GRUB2
+LB_SYSLINUX_THEME=""
+
+# $LB_SYSLINUX_SPLASH: set syslinux splash image
+# Disabled since we're using GRUB2
+LB_SYSLINUX_SPLASH=""
+
+# $LB_SYSLINUX_TIMEOUT: set syslinux timeout
+# Disabled since we're using GRUB2
+LB_SYSLINUX_TIMEOUT=""
+
+# $LB_SYSLINUX_MENU: set syslinux menu type
+# Disabled since we're using GRUB2
+LB_SYSLINUX_MENU=""
 
 # $LB_CHECKSUMS: set checksums
 # (Default: sha256)

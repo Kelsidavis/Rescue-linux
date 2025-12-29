@@ -122,6 +122,8 @@ clean_stale_files
 if [ "$FORCE_CLEAN" = true ]; then
     echo "Force cleaning previous build..."
     lb clean --purge 2>/dev/null || true
+    # Remove .build to ensure fresh configuration
+    rm -rf .build 2>/dev/null || true
     echo ""
 fi
 
@@ -204,7 +206,13 @@ echo "This will take 15-30 minutes depending on your internet speed."
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
 
-lb build 2>&1 | tee build.log
+# Always ensure live-build configuration is properly initialized
+# This processes our config/ directory settings and ensures correct bootloader
+echo "Configuring live-build..."
+lb config --bootloaders grub-efi 2>&1 | tee build.log
+
+echo "Building ISO..."
+lb build 2>&1 | tee -a build.log
 
 # Check result
 if [ -f "live-image-amd64.hybrid.iso" ]; then
